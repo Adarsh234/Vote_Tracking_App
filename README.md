@@ -92,7 +92,7 @@ Start the application by running the Splash Screen file:
 <img width="1108" height="867" alt="image" src="https://github.com/user-attachments/assets/011ce7cf-6940-45d1-9692-ee0b740ad427" />
 
 
-<img width="1108" height="867" alt="image" src="https://github.com/user-attachments/assets/e3d467b7-5b1e-44c0-808d-a6c6d27448f0" />
+<img width="1108" height="867" alt="image" src="https://github.com/user-attachments/assets/2b3c81b6-7d80-411e-a7cb-12847d5f6b8e" />
 
 
 ## 🤝 Contributing
