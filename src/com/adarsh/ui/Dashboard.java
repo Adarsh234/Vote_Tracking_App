@@ -47,12 +47,6 @@ public class Dashboard extends JFrame {
         title.setForeground(accentColor);
         title.setBounds(0, 30, 900, 40);
         add(title);
-        
-        JLabel subtitle = new JLabel("Secure Voting System v1.0", SwingConstants.CENTER);
-        subtitle.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        subtitle.setForeground(Color.GRAY);
-        subtitle.setBounds(0, 70, 900, 20);
-        add(subtitle);
 
         // ============================
         // LEFT SIDE: VOTING PANEL
@@ -64,7 +58,6 @@ public class Dashboard extends JFrame {
         leftPanel.setBackground(bgLighter);
         leftPanel.setBounds(50, 120, 350, 400);
         leftPanel.setBorder(BorderFactory.createLineBorder(new Color(100, 100, 100)));
-        // We add this LAST so it sits behind components, or we just add components to Frame
         
         JLabel voteLabel = new JLabel("CAST YOUR VOTE");
         voteLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
@@ -87,10 +80,8 @@ public class Dashboard extends JFrame {
         voteBtn.setBounds(80, 360, 290, 50);
         add(voteBtn);
         
-        // Add the background panel specifically behind these
+        // Fix z-order
         add(leftPanel);
-        // Fix z-order (Swing paints in order, so add panel last or use layers. 
-        // Simple fix: Add panel first, but here we used absolute layout order)
         getContentPane().setComponentZOrder(leftPanel, getContentPane().getComponentCount()-1);
 
 
@@ -114,9 +105,17 @@ public class Dashboard extends JFrame {
         updateResults(); 
         add(resultArea);
 
-        // --- FOOTER / LOGOUT ---
-        JButton logoutBtn = createStyledButton("LOGOUT", new Color(192, 57, 43)); // Red color
-        logoutBtn.setBounds(750, 600, 100, 40);
+        // --- BOTTOM BUTTONS ---
+        
+        // RESET BUTTON (New Feature)
+        JButton resetBtn = createStyledButton("RESET ELECTION", new Color(142, 68, 173)); // Purple
+        resetBtn.setBounds(50, 600, 180, 40); // Bottom Left
+        resetBtn.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        add(resetBtn);
+
+        // LOGOUT BUTTON
+        JButton logoutBtn = createStyledButton("LOGOUT", new Color(192, 57, 43)); // Red
+        logoutBtn.setBounds(750, 600, 100, 40); // Bottom Right
         logoutBtn.setFont(new Font("Segoe UI", Font.BOLD, 12));
         add(logoutBtn);
 
@@ -138,6 +137,21 @@ public class Dashboard extends JFrame {
                 }
             } else {
                 JOptionPane.showMessageDialog(this, "Select a party to vote.");
+            }
+        });
+
+        // Event for Reset Button
+        resetBtn.addActionListener(e -> {
+            int confirm = JOptionPane.showConfirmDialog(this, 
+                "Are you sure you want to RESET all votes to zero?", 
+                "Admin Warning", 
+                JOptionPane.YES_NO_OPTION);
+                
+            if(confirm == JOptionPane.YES_OPTION) {
+                // Assuming you added the resetVotes() method to VoteDao as discussed
+                voteDao.resetVotes(); 
+                updateResults();
+                JOptionPane.showMessageDialog(this, "Election has been reset!");
             }
         });
 
@@ -183,7 +197,6 @@ public class Dashboard extends JFrame {
         sb.append(" PARTY          VOTES       \n");
         sb.append("----------------------------\n\n");
         
-        // Adding some emoji or symbols for style
         sb.append(String.format(" %-15s %03d \n\n", "Party A", results.getOrDefault("Party A", 0)));
         sb.append(String.format(" %-15s %03d \n\n", "Party B", results.getOrDefault("Party B", 0)));
         sb.append(String.format(" %-15s %03d \n\n", "Party C", results.getOrDefault("Party C", 0)));

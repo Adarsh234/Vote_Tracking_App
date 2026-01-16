@@ -48,4 +48,16 @@ public class VoteDao {
         }
         return results;
     }
+
+    public void resetVotes() {
+        String sql = "UPDATE candidates SET votes = 0";
+        try {
+            Connection con = DB.createConnection();
+            PreparedStatement pt = con.prepareStatement(sql);
+            pt.executeUpdate();
+            con.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
