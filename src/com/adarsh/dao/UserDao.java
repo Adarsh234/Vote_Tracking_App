@@ -17,12 +17,8 @@ public class UserDao {
         ResultSet rs = null;
         
         try {
-            // --- CHANGE IS HERE ---
-            // Old way: DB db = new DB(); con = db.createConnection();
-            // New way: Call the static method directly via the class name
             con = DB.createConnection(); 
-            // ---------------------
-
+            
             pt = con.prepareStatement(sql);
             pt.setString(1, userdto.getUserid());
             pt.setString(2, userdto.getPassword());
@@ -30,13 +26,12 @@ public class UserDao {
             rs = pt.executeQuery();
             
             if (rs.next()) {
-                return true; // User found
+                return true;
             }
             
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            // It is best practice to close your connections
             try {
                 if (rs != null) rs.close();
                 if (pt != null) pt.close();
@@ -46,6 +41,6 @@ public class UserDao {
             }
         }
         
-        return false; // User not found
+        return false;
     }
 }

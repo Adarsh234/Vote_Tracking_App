@@ -31,25 +31,16 @@ public class SplaceScreen extends JWindow {
         contentPanel.setBackground(bgDark);
         setContentPane(contentPanel);
 
-        // --- LOGO RESIZING SECTION ---
-        
-        // 1. Load the original image
         ImageIcon originalIcon = new ImageIcon("images/vote_logo.png");
         
-        // 2. Define desired dimensions (Adjust these numbers to fit your needs)
         int targetWidth = 400;
         int targetHeight = 300;
-        
-        // 3. Get the image instance and scale it
-        // SCALE_SMOOTH gives the best quality result
+
         Image scaledImage = originalIcon.getImage().getScaledInstance(targetWidth, targetHeight, Image.SCALE_SMOOTH);
         
-        // 4. Create a new ImageIcon from the scaled image
         ImageIcon finalIcon = new ImageIcon(scaledImage);
         
-        // 5. Put the final icon into the label
         JLabel lb = new JLabel(finalIcon);
-        // --- END LOGO RESIZING SECTION ---
         
         lb.setHorizontalAlignment(SwingConstants.CENTER);
         contentPanel.add(lb, BorderLayout.CENTER);
@@ -70,7 +61,6 @@ public class SplaceScreen extends JWindow {
         progressBar.setBorderPainted(false);
         progressBar.setFont(new Font("Segoe UI", Font.BOLD, 12));
         
-        // Use BasicUI to remove the default 3D look (makes it flat)
         progressBar.setUI(new BasicProgressBarUI() {
             @Override
             protected Color getSelectionBackground() { return Color.BLACK; }
@@ -78,13 +68,11 @@ public class SplaceScreen extends JWindow {
             protected Color getSelectionForeground() { return Color.BLACK; }
         });
 
-        // Wrapper panel to squeeze the progress bar (so it isn't full width)
         JPanel barContainer = new JPanel(new BorderLayout());
         barContainer.setBackground(bgDark);
         barContainer.setBorder(new EmptyBorder(0, 100, 0, 100)); // 100px padding on Left/Right
         barContainer.add(progressBar, BorderLayout.CENTER);
 
-        // Assemble Bottom Panel
         bottomPanel.add(loadingText, BorderLayout.NORTH);
         bottomPanel.add(barContainer, BorderLayout.SOUTH);
 
@@ -104,8 +92,7 @@ public class SplaceScreen extends JWindow {
             } else {
                 timer.stop();
                 dispose();
-                // Open Login Screen
-                Login login = new Login(); // Commented out for compilation testing
+                Login login = new Login();
                 login.setVisible(true);
             }
         });

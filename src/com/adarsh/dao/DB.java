@@ -6,7 +6,6 @@ import java.sql.SQLException;
 
 public class DB {
     
-    // Private constructor prevents outside classes from doing 'new DB()'
     private DB(){} 
 
     public static Connection createConnection() throws ClassNotFoundException, SQLException{
@@ -24,8 +23,6 @@ public class DB {
     }
 
     public static void main(String[] args) throws ClassNotFoundException, SQLException {
-        // CORRECTED: Call the static method directly. 
-        // No need for 'DB db = new DB();'
         DB.createConnection();
     }
 }

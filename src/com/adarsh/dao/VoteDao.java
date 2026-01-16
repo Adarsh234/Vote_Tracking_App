@@ -8,7 +8,6 @@ import java.util.Map;
 
 public class VoteDao {
 
-    // Method to increase vote count for a specific candidate
     public boolean castVote(String candidateName) {
         String sql = "UPDATE candidates SET votes = votes + 1 WHERE name = ?";
         
@@ -20,7 +19,7 @@ public class VoteDao {
             int rowsUpdated = pt.executeUpdate();
             
             con.close();
-            return rowsUpdated > 0; // Returns true if update was successful
+            return rowsUpdated > 0; 
             
         } catch (Exception e) {
             e.printStackTrace();
@@ -28,7 +27,6 @@ public class VoteDao {
         }
     }
 
-    // Method to get all current votes for the Result Card
     public Map<String, Integer> getResults() {
         Map<String, Integer> results = new HashMap<>();
         String sql = "SELECT name, votes FROM candidates";

@@ -22,16 +22,11 @@ public class Login extends JFrame {
     JTextField userid;
     JPasswordField passid;
 
-    // --- COLORS ---
-    // Dark Blue Background
     Color bgDark = new Color(44, 62, 80); 
-    // Nice Orange Accent
     Color accentColor = new Color(230, 126, 34); 
-    // White Text
     Color textWhite = Color.WHITE; 
 
     public Login() {
-        // Window Setup
         setSize(900, 700);
         setResizable(false);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -39,7 +34,6 @@ public class Login extends JFrame {
         getContentPane().setBackground(bgDark);
         getContentPane().setLayout(null);
 
-        // --- HEADER TITLE ---
         JLabel title = new JLabel("VOTING SYSTEM", SwingConstants.CENTER);
         title.setFont(new Font("Segoe UI", Font.BOLD, 36));
         title.setForeground(textWhite);
@@ -52,7 +46,6 @@ public class Login extends JFrame {
         subTitle.setBounds(0, 130, 900, 30);
         add(subTitle);
 
-        // --- USERNAME SECTION ---
         JLabel userlb = new JLabel("USERNAME");
         userlb.setFont(new Font("Segoe UI", Font.BOLD, 14));
         userlb.setForeground(textWhite);
@@ -68,7 +61,6 @@ public class Login extends JFrame {
         ));
         add(userid);
 
-        // --- PASSWORD SECTION ---
         JLabel passlb = new JLabel("PASSWORD");
         passlb.setFont(new Font("Segoe UI", Font.BOLD, 14));
         passlb.setForeground(textWhite);
@@ -84,7 +76,6 @@ public class Login extends JFrame {
         ));
         add(passid);
 
-        // --- LOGIN BUTTON ---
         JButton loginBt = new JButton("LOGIN");
         loginBt.setBounds(250, 430, 400, 50);
         loginBt.setFont(new Font("Segoe UI", Font.BOLD, 18));
@@ -94,7 +85,6 @@ public class Login extends JFrame {
         loginBt.setBorder(BorderFactory.createEmptyBorder()); // Flat look
         loginBt.setCursor(new Cursor(Cursor.HAND_CURSOR)); // Hand pointer on hover
         
-        // Add simple hover effect
         loginBt.addMouseListener(new MouseAdapter() {
             public void mouseEntered(MouseEvent e) {
                 loginBt.setBackground(new Color(211, 84, 0)); // Darker orange on hover
@@ -106,13 +96,11 @@ public class Login extends JFrame {
         
         add(loginBt);
 
-        // --- FOOTER ---
         JLabel footer = new JLabel("© 2026 JAVA Voting Projects", SwingConstants.CENTER);
         footer.setForeground(Color.GRAY);
         footer.setBounds(0, 620, 900, 30);
         add(footer);
 
-        // Event Listener
         loginBt.addActionListener(e -> doLogin());
     }
 
