@@ -104,6 +104,7 @@ public class Login extends JFrame {
         loginBt.addActionListener(e -> doLogin());
     }
 
+    // Inside Login.java
     void doLogin() {
         String uid = userid.getText();
         String password = new String(passid.getPassword());
@@ -113,19 +114,19 @@ public class Login extends JFrame {
         dto.setPassword(password);
 
         UserDao dao = new UserDao();
-        
-        try {
-            if (dao.auth(dto)) {
-                JOptionPane.showMessageDialog(this, "Login Successful!");
-                this.dispose(); 
-                Dashboard dashboard = new Dashboard();
-                dashboard.setVisible(true);
+        String role = dao.checkLogin(dto); // Returns "admin", "user", or null
+
+        if (role != null) {
+            this.dispose(); // Close Login
+            
+            if (role.equals("admin")) {
+                new AdminDashboard().setVisible(true);
             } else {
-                JOptionPane.showMessageDialog(this, "Invalid UserID or Password", "Login Failed", JOptionPane.ERROR_MESSAGE);
+                // Pass the UserID so we can track their vote later!
+                new UserDashboard(uid).setVisible(true); 
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "System Error: " + e.getMessage());
+        } else {
+            JOptionPane.showMessageDialog(this, "Invalid Credentials");
         }
     }
 
