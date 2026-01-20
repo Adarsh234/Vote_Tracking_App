@@ -1,80 +1,91 @@
 # Vote Tracking Application 🗳️
 
-A secure and modern desktop Voting System built with **Java Swing**. This project implements a robust **MVC (Model-View-Controller)** architecture and uses the **DAO (Data Access Object)** design pattern to ensure clean separation between the user interface and database operations.
+A secure, enterprise-grade Voting Management System built with **Java Swing** and **MySQL**. This project features a robust **Role-Based Access Control (RBAC)** system, allowing Administrators to manage elections dynamically and Users to vote securely in real-time.
 
 ## 🚀 Key Features
 
-* **Secure Authentication:** Admin login system connected to a MySQL database to prevent unauthorized access.
-* **Modern UI:** A clean, flat-design interface featuring a professional dark theme (`#2C3E50`) with orange accents (`#E67E22`).
-* **Real-time Dashboard:** Interactive dashboard to cast votes and view live election standings instantly.
-* **Persistent Data:** All votes and user credentials are stored permanently in a MySQL database.
-* **Loading Screen:** A dynamic splash screen with a simulated progress bar for a polished user experience.
+### 🔐 Security & Architecture
+* **MVC & DAO Patterns:** Clean separation of concerns (Model-View-Controller & Data Access Object).
+* **Role-Based Login:** Smart authentication that directs users to specific dashboards based on their role (`Admin` vs `User`).
+* **Double-Vote Prevention:** Database flags ensure users can only vote **once** per election.
+
+### 👨‍💼 Administrator Dashboard
+* **Dynamic Candidate Management:** Admin can start a new election by typing custom candidate names (e.g., "Alice, Bob, Charlie"). The system automatically generates the ballot.
+* **Poll Configuration:** Update the active poll question instantly.
+* **Danger Zone:** "Reset Election" functionality to wipe all votes and reset user statuses for a fresh poll.
+
+### 👤 User Dashboard
+* **Dynamic Voting Interface:** Radio buttons are automatically generated based on the current candidates in the database.
+* **Live Split-Screen:** Users see the voting form on the left and a **Real-Time Result Matrix** on the right.
+* **One-Vote Policy:** Once a vote is cast, the interface locks to prevent duplicate submissions.
 
 ## 🛠️ Tech Stack
 
 * **Language:** Java (JDK 8+)
-* **GUI Framework:** Java Swing & AWT
+* **GUI Framework:** Java Swing & AWT (Flat Design/Dark Theme)
 * **Database:** MySQL
-* **Design Patterns:** * **DAO** (Data Access Object) for database logic.
-    * **DTO** (Data Transfer Object) for data transport.
-    * **Singleton** for efficient Database Connections.
+* **Connectivity:** JDBC (Java Database Connectivity)
 
-## 📂 Project Architecture
-
-The project is organized into logical packages to ensure maintainability:
+## 📂 Project Structure
 
 ```text
 src/com/adarsh/
-├── dao/          # Data Access Objects (Database Logic)
-│   ├── DB.java        -> Singleton Database Connection
-│   ├── UserDao.java   -> Handles User Authentication queries
-│   └── VoteDao.java   -> Handles Voting & Result queries
-├── dto/          # Data Transfer Objects
-│   └── UserDto.java   -> Carries user data between layers
-├── ui/           # User Interface (Swing Views)
-│   ├── SplaceScreen.java -> Loading Window with Progress Bar
-│   ├── Login.java        -> Authentication Screen
-│   └── Dashboard.java    -> Main Voting & Results Interface
+├── dao/              # Database Logic
+│   ├── DB.java       -> Singleton Database Connection
+│   ├── UserDao.java  -> Auth & Role Verification
+│   └── VoteDao.java  -> Dynamic Candidate & Voting Logic
+├── ui/               # User Interface
+│   ├── SplaceScreen.java -> Loading Animation
+│   ├── Login.java        -> Role-Based Login Screen
+│   ├── AdminDashboard.java -> Election Management Console
+│   └── UserDashboard.java  -> Voting & Results Panel
 
 ```
 
 ## ⚙️ Setup & Installation
 
-### 1. Prerequisites
+### 1. Database Setup (Crucial)
 
-* Java Development Kit (JDK) installed.
-* MySQL Server installed and running.
-* `mysql-connector-j` (JDBC Driver) added to your project's libraries.
-
-### 2. Database Configuration
-
-Run the following SQL commands in your MySQL Workbench or Command Line to set up the necessary tables:
+You must update your MySQL database to support roles and dynamic polling. Run this script in **MySQL Workbench**:
 
 ```sql
-CREATE DATABASE bookingtb;
+CREATE DATABASE IF NOT EXISTS bookingtb;
 USE bookingtb;
 
--- Create Users Table for Authentication
+-- 1. Users Table (With Role & Vote Status)
 CREATE TABLE users (
     userid VARCHAR(50) PRIMARY KEY,
-    password VARCHAR(50)
+    password VARCHAR(50),
+    role VARCHAR(20) DEFAULT 'user',  -- 'admin' or 'user'
+    has_voted TINYINT DEFAULT 0       -- 0 = False, 1 = True
 );
 
--- Create Candidates Table for Voting
+-- 2. Candidates Table (Stores Dynamic Nominees)
 CREATE TABLE candidates (
     name VARCHAR(50) PRIMARY KEY,
     votes INT DEFAULT 0
 );
 
--- Insert Default Data
-INSERT INTO users (userid, password) VALUES ('admin', '123');
-INSERT INTO candidates (name, votes) VALUES ('Party A', 0), ('Party B', 0), ('Party C', 0);
+-- 3. Poll Settings (Stores the Question)
+CREATE TABLE poll_settings (
+    id INT PRIMARY KEY,
+    question VARCHAR(255)
+);
+
+-- 4. Insert Default Data
+INSERT INTO users (userid, password, role) VALUES 
+('admin', '123', 'admin'),
+('user1', '123', 'user'),
+('user2', '123', 'user');
+
+INSERT INTO poll_settings VALUES (1, 'Who is your favorite superhero?');
+INSERT INTO candidates (name) VALUES ('Iron Man'), ('Captain America'), ('Thor');
 
 ```
 
-### 3. Update Connection Details
+### 2. Configure Java Connection
 
-Navigate to `src/com/adarsh/dao/DB.java` and ensure your database credentials match your local setup:
+Open `src/com/adarsh/dao/DB.java` and update your MySQL credentials:
 
 ```java
 String url = "jdbc:mysql://localhost:3306/bookingtb";
@@ -83,24 +94,37 @@ String pass = "your_password"; // Your MySQL Password
 
 ```
 
-### 4. Run the Application
+### 3. Run the App
 
-Start the application by running the Splash Screen file:
+Run the **Splash Screen** to start the application:
 `src/com/adarsh/ui/SplaceScreen.java`
 
+## 📖 Usage Guide
+
+| Role | Username | Password | Capabilities |
+| --- | --- | --- | --- |
+| **Admin** | `admin` | `123` | Create Polls, Add Candidates, Reset System |
+| **User** | `user1` | `123` | Vote (One-time), View Live Results |
+
 ## 📸 Screenshots
-<img width="1108" height="867" alt="image" src="https://github.com/user-attachments/assets/011ce7cf-6940-45d1-9692-ee0b740ad427" />
 
+**Login Screen**
+<img width="1108" height="867" alt="image" src="https://github.com/user-attachments/assets/3cb147da-6e89-4d55-9889-c818ce841956" />
 
-<img width="1108" height="867" alt="image" src="https://github.com/user-attachments/assets/2b3c81b6-7d80-411e-a7cb-12847d5f6b8e" />
+**Admin Dashbard**
+<img width="1108" height="930" alt="image" src="https://github.com/user-attachments/assets/b03c3a4c-5e3e-4a65-bc34-28a93d6068c0" />
 
+**User Dashboard**
+<img width="1108" height="803" alt="image" src="https://github.com/user-attachments/assets/beacc4df-c8a4-44be-854e-61b09165a629" />
 
 ## 🤝 Contributing
 
-Contributions, issues, and feature requests are welcome!
+Contributions are welcome! Please fork the repository and submit a pull request.
 
 ## 📜 License
 
 This project is open-source.
+
+```
 
 ```
