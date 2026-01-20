@@ -1,13 +1,14 @@
 package com.adarsh.ui;
 
 import java.awt.Color;
-// import java.awt.Cursor;
 import java.awt.Font;
-// import java.awt.event.MouseAdapter;
-// import java.awt.event.MouseEvent;
+import java.awt.GridLayout;
 import java.sql.ResultSet;
+import java.util.Enumeration;
+import java.util.List;
 import java.util.Map;
 
+import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -16,6 +17,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 
@@ -30,8 +32,11 @@ public class UserDashboard extends JFrame {
     JButton voteBtn;
     JTextArea resultArea;
     
+    // Logic Components
     UserDao userDao;
     VoteDao voteDao;
+    ButtonGroup group;       // Holds the dynamic buttons
+    JPanel dynamicVotePanel; // Visual container for buttons
     
     // --- THEME COLORS ---
     Color bgDark = new Color(44, 62, 80);       // Dark Blue
@@ -46,7 +51,7 @@ public class UserDashboard extends JFrame {
 
         // Window Setup
         setTitle("User Voting Panel");
-        setSize(900, 600);
+        setSize(900, 650);
         setResizable(false);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -55,51 +60,67 @@ public class UserDashboard extends JFrame {
 
         // --- HEADER ---
         JLabel header = new JLabel("ACTIVE POLL", SwingConstants.CENTER);
-        header.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        header.setFont(new Font("Segoe UI", Font.BOLD, 32));
         header.setForeground(accentColor);
         header.setBounds(0, 20, 900, 30);
         add(header);
 
         // Dynamic Question from Database
         questionLabel = new JLabel("Loading Question...", SwingConstants.CENTER);
-        questionLabel.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        questionLabel.setFont(new Font("Segoe UI", Font.PLAIN, 18));
         questionLabel.setForeground(Color.LIGHT_GRAY);
-        questionLabel.setBounds(0, 55, 900, 20);
+        questionLabel.setBounds(0, 55, 900, 30);
         add(questionLabel);
         loadQuestion(); 
 
         // ============================
-        // LEFT SIDE: VOTING AREA
+        // LEFT SIDE: VOTING AREA (DYNAMIC)
         // ============================
-        JPanel votePanel = new JPanel();
-        votePanel.setLayout(null);
-        votePanel.setBackground(bgPanel);
-        votePanel.setBounds(50, 100, 380, 400);
-        votePanel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
-        add(votePanel);
+        
+        // 1. Visual Background Box
+        JPanel containerPanel = new JPanel(null);
+        containerPanel.setBackground(bgPanel);
+        containerPanel.setBounds(50, 100, 380, 400);
+        containerPanel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+        add(containerPanel);
 
         JLabel lblVote = new JLabel("Select Candidate");
         lblVote.setFont(new Font("Segoe UI", Font.BOLD, 18));
         lblVote.setForeground(textWhite);
         lblVote.setBounds(20, 20, 200, 30);
-        votePanel.add(lblVote);
+        containerPanel.add(lblVote);
 
-        JRadioButton rb1 = createStyledRadio("Party A", 80);
-        JRadioButton rb2 = createStyledRadio("Party B", 130);
-        JRadioButton rb3 = createStyledRadio("Party C", 180);
-
-        ButtonGroup group = new ButtonGroup();
-        group.add(rb1); group.add(rb2); group.add(rb3);
+        // 2. Dynamic List Container (Scrollable)
+        dynamicVotePanel = new JPanel();
+        dynamicVotePanel.setLayout(new GridLayout(0, 1, 0, 10)); // 1 Col, Auto Rows, 10px Gap
+        dynamicVotePanel.setBackground(bgPanel);
         
-        votePanel.add(rb1); votePanel.add(rb2); votePanel.add(rb3);
+        group = new ButtonGroup();
+        List<String> candidates = voteDao.getAllCandidates();
+        
+        // Loop through DB names and create buttons
+        for(String name : candidates) {
+            JRadioButton rb = createStyledRadio(name);
+            rb.setActionCommand(name); // IMPORTANT: Stores the name to retrieve later
+            group.add(rb);
+            dynamicVotePanel.add(rb);
+        }
 
+        // 3. Scroll Pane (Holds the dynamic panel)
+        JScrollPane scroll = new JScrollPane(dynamicVotePanel);
+        scroll.setBounds(20, 60, 340, 200);
+        scroll.setBorder(null); // No border
+        scroll.getViewport().setBackground(bgPanel); // Match background
+        containerPanel.add(scroll);
+
+        // 4. Vote Button
         voteBtn = new JButton("CONFIRM VOTE");
-        voteBtn.setBounds(40, 280, 300, 50);
+        voteBtn.setBounds(40, 300, 300, 50);
         voteBtn.setBackground(accentColor);
         voteBtn.setForeground(Color.WHITE);
         voteBtn.setFont(new Font("Segoe UI", Font.BOLD, 16));
         voteBtn.setFocusPainted(false);
-        votePanel.add(voteBtn);
+        containerPanel.add(voteBtn);
 
 
         // ============================
@@ -109,7 +130,7 @@ public class UserDashboard extends JFrame {
         resultPanel.setLayout(null);
         resultPanel.setBackground(new Color(30, 30, 30)); // Black/Grey
         resultPanel.setBounds(470, 100, 380, 400);
-        resultPanel.setBorder(BorderFactory.createLineBorder(Color.GREEN)); // Matrix style border
+        resultPanel.setBorder(BorderFactory.createLineBorder(Color.GREEN)); 
         add(resultPanel);
 
         JLabel lblResult = new JLabel("Live Results");
@@ -126,7 +147,6 @@ public class UserDashboard extends JFrame {
         resultArea.setEditable(false);
         resultPanel.add(resultArea);
         
-        // Initial Load of Results
         updateResults();
 
         // --- FOOTER / LOGOUT ---
@@ -144,24 +164,17 @@ public class UserDashboard extends JFrame {
 
         // --- EVENTS ---
         voteBtn.addActionListener(e -> {
-            String selected = null;
-            if(rb1.isSelected()) selected = "Party A";
-            if(rb2.isSelected()) selected = "Party B";
-            if(rb3.isSelected()) selected = "Party C";
-
-            if(selected != null) {
-                // 1. Cast Vote
+            // Get selected button model
+            if (group.getSelection() != null) {
+                String selected = group.getSelection().getActionCommand();
+                
                 boolean success = voteDao.castVote(selected);
                 
                 if(success) {
-                    // 2. Mark User as Voted
                     userDao.markUserAsVoted(currentUserId);
-                    
-                    JOptionPane.showMessageDialog(this, "Vote Submitted Successfully!");
-                    
-                    // 3. Disable Buttons & Update Results
+                    JOptionPane.showMessageDialog(this, "Vote Submitted Successfully for " + selected + "!");
                     disableVoting("Vote Cast");
-                    updateResults(); // Refresh the right screen immediately
+                    updateResults(); 
                 }
             } else {
                 JOptionPane.showMessageDialog(this, "Please select a candidate first.");
@@ -190,9 +203,10 @@ public class UserDashboard extends JFrame {
         sb.append(" CANDIDATE      VOTES       \n");
         sb.append("----------------------------\n\n");
         
-        sb.append(String.format(" Party A        [ %03d ] \n\n", results.getOrDefault("Party A", 0)));
-        sb.append(String.format(" Party B        [ %03d ] \n\n", results.getOrDefault("Party B", 0)));
-        sb.append(String.format(" Party C        [ %03d ] \n\n", results.getOrDefault("Party C", 0)));
+        // Dynamic Loop for Results
+        for (Map.Entry<String, Integer> entry : results.entrySet()) {
+            sb.append(String.format(" %-14s [ %03d ] \n\n", entry.getKey(), entry.getValue()));
+        }
         
         sb.append("----------------------------");
         resultArea.setText(sb.toString());
@@ -202,11 +216,17 @@ public class UserDashboard extends JFrame {
         voteBtn.setEnabled(false);
         voteBtn.setText(message);
         voteBtn.setBackground(Color.GRAY);
+        
+        // Also disable radio buttons
+        Enumeration<AbstractButton> buttons = group.getElements();
+        while(buttons.hasMoreElements()) {
+            buttons.nextElement().setEnabled(false);
+        }
     }
 
-    private JRadioButton createStyledRadio(String text, int y) {
+    private JRadioButton createStyledRadio(String text) {
         JRadioButton rb = new JRadioButton(text);
-        rb.setBounds(40, y, 200, 30);
+        // Note: No setBounds needed because we are using GridLayout now!
         rb.setBackground(bgPanel);
         rb.setForeground(textWhite);
         rb.setFont(new Font("Segoe UI", Font.PLAIN, 16));

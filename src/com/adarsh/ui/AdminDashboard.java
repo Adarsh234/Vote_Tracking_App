@@ -14,14 +14,18 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
 import com.adarsh.dao.DB;
+import com.adarsh.dao.VoteDao;
 
 public class AdminDashboard extends JFrame {
 
     JTextField questionField;
+    JTextArea candidateInput; // Input for dynamic candidates
 
     // --- THEME COLORS ---
     Color bgDark = new Color(44, 62, 80);       // Main Background
@@ -32,7 +36,7 @@ public class AdminDashboard extends JFrame {
 
     public AdminDashboard() {
         // Window Setup
-        setSize(900, 650); // Consistent size with other screens
+        setSize(900, 750); // Increased height to fit new section
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setTitle("Admin Control Panel");
@@ -53,47 +57,79 @@ public class AdminDashboard extends JFrame {
         add(subtitle);
 
         // ============================
-        // SECTION 1: POLL SETTINGS (Card)
+        // SECTION 1: POLL SETTINGS (Question)
         // ============================
-        JPanel pollPanel = createCardPanel(100, 130, 700, 180);
+        JPanel pollPanel = createCardPanel(100, 120, 700, 150);
         add(pollPanel);
 
         JLabel lblPoll = new JLabel("SET ACTIVE POLL QUESTION");
         lblPoll.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        lblPoll.setForeground(new Color(52, 152, 219)); // Light Blue title
+        lblPoll.setForeground(new Color(52, 152, 219)); // Light Blue
         lblPoll.setBounds(30, 20, 300, 20);
         pollPanel.add(lblPoll);
 
-        // Styled Text Field
         questionField = new JTextField();
-        questionField.setBounds(30, 60, 450, 45);
-        questionField.setBackground(bgDark); // Dark input background
+        questionField.setBounds(30, 55, 450, 45);
+        questionField.setBackground(bgDark);
         questionField.setForeground(textWhite);
         questionField.setCaretColor(textWhite);
         questionField.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         questionField.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(Color.GRAY), 
-            BorderFactory.createEmptyBorder(5, 10, 5, 10) // Padding inside input
+            BorderFactory.createEmptyBorder(5, 10, 5, 10)
         ));
         pollPanel.add(questionField);
 
-        // Update Button
         JButton updateBtn = createStyledButton("UPDATE QUESTION", accentColor);
-        updateBtn.setBounds(500, 60, 170, 45);
+        updateBtn.setBounds(500, 55, 170, 45);
         pollPanel.add(updateBtn);
         
-        JLabel lblHint = new JLabel("This question will be visible to all users immediately.");
+        JLabel lblHint = new JLabel("Visible to all users immediately.");
         lblHint.setFont(new Font("Segoe UI", Font.ITALIC, 12));
         lblHint.setForeground(Color.GRAY);
-        lblHint.setBounds(30, 115, 400, 20);
+        lblHint.setBounds(30, 110, 400, 20);
         pollPanel.add(lblHint);
 
 
         // ============================
-        // SECTION 2: DANGER ZONE (Card)
+        // SECTION 2: MANAGE CANDIDATES (NEW!)
         // ============================
-        JPanel dangerPanel = createCardPanel(100, 350, 700, 120);
-        dangerPanel.setBorder(BorderFactory.createLineBorder(dangerColor)); // Red Border
+        JPanel candidatePanel = createCardPanel(100, 290, 700, 180);
+        add(candidatePanel);
+
+        JLabel lblCand = new JLabel("MANAGE CANDIDATES");
+        lblCand.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        lblCand.setForeground(new Color(46, 204, 113)); // Green title
+        lblCand.setBounds(30, 20, 300, 20);
+        candidatePanel.add(lblCand);
+
+        JLabel lblNote = new JLabel("Enter names separated by commas (e.g. Iron Man, Hulk, Thor)");
+        lblNote.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        lblNote.setForeground(Color.LIGHT_GRAY);
+        lblNote.setBounds(30, 45, 400, 20);
+        candidatePanel.add(lblNote);
+
+        candidateInput = new JTextArea();
+        candidateInput.setBackground(bgDark);
+        candidateInput.setForeground(textWhite);
+        candidateInput.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        candidateInput.setCaretColor(textWhite);
+        
+        JScrollPane scroll = new JScrollPane(candidateInput);
+        scroll.setBounds(30, 70, 450, 80);
+        scroll.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+        candidatePanel.add(scroll);
+
+        JButton startElectionBtn = createStyledButton("START ELECTION", accentColor);
+        startElectionBtn.setBounds(500, 70, 170, 45);
+        candidatePanel.add(startElectionBtn);
+
+
+        // ============================
+        // SECTION 3: DANGER ZONE (Reset)
+        // ============================
+        JPanel dangerPanel = createCardPanel(100, 490, 700, 120);
+        dangerPanel.setBorder(BorderFactory.createLineBorder(dangerColor)); 
         add(dangerPanel);
 
         JLabel lblDanger = new JLabel("DANGER ZONE");
@@ -102,21 +138,20 @@ public class AdminDashboard extends JFrame {
         lblDanger.setBounds(30, 20, 300, 20);
         dangerPanel.add(lblDanger);
 
-        JLabel lblWarning = new JLabel("Resetting the election will delete ALL votes and allow users to vote again.");
+        JLabel lblWarning = new JLabel("This will reset all votes to zero but keep the current candidates.");
         lblWarning.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         lblWarning.setForeground(Color.LIGHT_GRAY);
         lblWarning.setBounds(30, 55, 450, 20);
         dangerPanel.add(lblWarning);
 
-        // Reset Button
-        JButton resetBtn = createStyledButton("RESET ELECTION", dangerColor);
+        JButton resetBtn = createStyledButton("RESET VOTES ONLY", dangerColor);
         resetBtn.setBounds(500, 40, 170, 45);
         dangerPanel.add(resetBtn);
 
 
         // --- LOGOUT BUTTON ---
         JButton logoutBtn = createStyledButton("LOGOUT", Color.GRAY);
-        logoutBtn.setBounds(760, 510, 100, 35);
+        logoutBtn.setBounds(760, 640, 100, 35);
         logoutBtn.setFont(new Font("Segoe UI", Font.BOLD, 12));
         add(logoutBtn);
 
@@ -125,7 +160,7 @@ public class AdminDashboard extends JFrame {
         // EVENTS
         // ============================
         
-        // 1. Set Poll Question
+        // 1. Update Question
         updateBtn.addActionListener(e -> {
             String question = questionField.getText();
             if(question.isEmpty()) {
@@ -144,24 +179,35 @@ public class AdminDashboard extends JFrame {
             }
         });
 
-        // 2. Reset Election logic
+        // 2. Start New Election (Dynamic Candidates)
+        startElectionBtn.addActionListener(e -> {
+            String rawText = candidateInput.getText();
+            if(rawText.trim().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please enter at least one candidate name!");
+                return;
+            }
+
+            int confirm = JOptionPane.showConfirmDialog(this, 
+                "⚠️ STARTING A NEW ELECTION ⚠️\n\n1. This will DELETE old candidates.\n2. This will DELETE all existing votes.\n3. All users can vote again.\n\nProceed?", 
+                "Confirm New Election", JOptionPane.YES_NO_OPTION);
+                
+            if(confirm == JOptionPane.YES_OPTION) {
+                String[] names = rawText.split(",");
+                VoteDao dao = new VoteDao();
+                dao.setupNewElection(names); // Calls the method we added to VoteDao
+                JOptionPane.showMessageDialog(this, "New Election Started with " + names.length + " candidates!");
+            }
+        });
+
+        // 3. Reset Votes Only (Danger Zone)
         resetBtn.addActionListener(e -> {
             int check = JOptionPane.showConfirmDialog(this, 
-                "⚠️ CRITICAL WARNING ⚠️\n\nThis will PERMANENTLY DELETE all votes.\nAll users will be allowed to vote again.\n\nAre you sure?", 
-                "Confirm System Reset", 
-                JOptionPane.YES_NO_OPTION,
-                JOptionPane.WARNING_MESSAGE);
+                "Are you sure you want to RESET votes to zero?\n(Candidates will stay the same)", 
+                "Confirm Reset", JOptionPane.YES_NO_OPTION);
                 
             if(check == JOptionPane.YES_OPTION) {
-                try {
-                    Connection con = DB.createConnection();
-                    // Clear Vote Counts
-                    con.prepareStatement("UPDATE candidates SET votes = 0").executeUpdate();
-                    // Reset User Vote Status
-                    con.prepareStatement("UPDATE users SET has_voted = 0").executeUpdate();
-                    
-                    JOptionPane.showMessageDialog(this, "System Reset Complete. Election Restarted.");
-                } catch(Exception ex) { ex.printStackTrace(); }
+                new VoteDao().resetVotes();
+                JOptionPane.showMessageDialog(this, "Votes have been reset to zero.");
             }
         });
 
@@ -171,14 +217,13 @@ public class AdminDashboard extends JFrame {
         });
     }
 
-    // --- HELPER METHODS FOR STYLING ---
+    // --- HELPER METHODS ---
 
     private JPanel createCardPanel(int x, int y, int w, int h) {
         JPanel p = new JPanel();
         p.setLayout(null);
         p.setBackground(bgPanel);
         p.setBounds(x, y, w, h);
-        // Subtle drop shadow effect using border (hacky but works for simple Swing)
         p.setBorder(BorderFactory.createLineBorder(new Color(60, 80, 100))); 
         return p;
     }
@@ -187,12 +232,11 @@ public class AdminDashboard extends JFrame {
         JButton btn = new JButton(text);
         btn.setBackground(bg);
         btn.setForeground(Color.WHITE);
-        btn.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 12)); // Slightly smaller font to fit text
         btn.setFocusPainted(false);
         btn.setBorder(BorderFactory.createEmptyBorder());
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         
-        // Hover Effect
         btn.addMouseListener(new MouseAdapter() {
             public void mouseEntered(MouseEvent e) { btn.setBackground(bg.darker()); }
             public void mouseExited(MouseEvent e) { btn.setBackground(bg); }

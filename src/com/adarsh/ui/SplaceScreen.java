@@ -83,7 +83,7 @@ public class SplaceScreen extends JWindow {
 
     Timer timer;
     void loadProgress() {
-        timer = new Timer(60, e -> {
+        timer = new Timer(30, e -> {
             int val = progressBar.getValue();
             if (val < 100) {
                 progressBar.setValue(val + 1);
