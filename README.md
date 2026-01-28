@@ -127,4 +127,6 @@ This project is open-source.
 
 ## 💡 Author 
 
-Developed with ❤️ by Adarsh Sharma 🔗 GitHub Repository
+<div align="center">
+  <sub>Built with ❤️ by <a href="https://github.com/Adarsh234">Adarsh234</a></sub>
+</div>
