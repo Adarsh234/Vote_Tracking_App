@@ -126,5 +126,8 @@ Contributions are welcome! Please fork the repository and submit a pull request.
 This project is open-source.
 
 ```
+## 💡 Author 
+
+Developed with ❤️ by Adarsh Sharma 🔗 GitHub Repository
 
 ```
